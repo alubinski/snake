@@ -9,12 +9,27 @@
 namespace Config {
 // Game Settings
 inline const std::string GAME_NAME{"snake"};
-inline constexpr int WINDOW_HEIGHT{400};
-inline constexpr int WINDOW_WIDTH{800};
+inline constexpr int GRID_COLUMS{16};
+static_assert(GRID_COLUMS >= 12, "GRID_COLUMS must be at least 12");
+
+inline constexpr int GRID_ROWS{5};
+static_assert(GRID_ROWS >= 5, "GRID_ROWS must be at least 5");
+
+// Size and Positioning
+inline constexpr int CELL_SIZE{36};
+inline constexpr int GRID_HEIGHT{GRID_ROWS * CELL_SIZE};
+inline constexpr int GRID_WIDTH{GRID_COLUMS * CELL_SIZE};
+
+inline constexpr int PADDING{5};
+inline constexpr int WINDOW_HEIGHT{GRID_HEIGHT + 2 * PADDING};
+inline constexpr int WINDOW_WIDTH{GRID_WIDTH + 2 * PADDING};
 
 // Colors
 inline constexpr SDL_Color BACKGROUND_COLOR{85, 138, 5, 255};
 inline constexpr SDL_Color FONT_COLOR{255, 255, 255, 255};
+inline constexpr SDL_Color CELL_COLOR_A{171, 214, 82, 255};
+inline constexpr SDL_Color CELL_COLOR_B{161, 208, 74, 255};
+inline constexpr SDL_Color SNAKE_COLOR{67, 117, 234, 255};
 
 // Assets Paths
 inline const std::string APPLE_IMAGE{"apple.png"};
