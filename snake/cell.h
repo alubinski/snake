@@ -24,6 +24,8 @@ public:
       if (state_ == CellState::Snake) {
         snakeDuration_++;
       }
+    } else if (e.type == RESTART_GAME) {
+      initialize();
     }
   }
 
