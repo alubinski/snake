@@ -8,7 +8,8 @@
 
 namespace UserEvents {
 inline Uint32 ADVANCE{SDL_RegisterEvents(1)};
-}
+inline Uint32 APPLE_EATEN{SDL_RegisterEvents(1)};
+} // namespace UserEvents
 
 namespace Config {
 // Game Settings

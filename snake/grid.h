@@ -2,6 +2,7 @@
 #define GRID_H
 
 #include "cell.h"
+#include "engine/random.h"
 #include "snake/assets.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_surface.h>
@@ -23,6 +24,9 @@ public:
     for (auto &cell : cells_) {
       cell.handleEvent(e);
     }
+    if (e.type == UserEvents::APPLE_EATEN) {
+      placeRandomApple();
+    }
   }
 
   void tick(Uint32 deltaTime) {
@@ -38,6 +42,15 @@ public:
   }
 
 private:
+  void placeRandomApple() {
+    while (true) {
+      size_t randomIndex{Engine::Random::Int(0, cells_.size() - 1)};
+      if (cells_[randomIndex].placeApple()) {
+        break;
+      }
+    }
+  }
+
   std::vector<Cell> cells_;
 };
 

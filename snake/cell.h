@@ -20,6 +20,10 @@ public:
     using namespace UserEvents;
     if (e.type == ADVANCE) {
       advance(e.user);
+    } else if (e.type == APPLE_EATEN) {
+      if (state_ == CellState::Snake) {
+        snakeDuration_++;
+      }
     }
   }
 
@@ -36,6 +40,15 @@ public:
                    SDL_MapRGB(surface->format, Config::SNAKE_COLOR.r,
                               Config::SNAKE_COLOR.g, Config::SNAKE_COLOR.b));
     }
+  }
+
+  bool placeApple() {
+    if (state_ != CellState::Empty) {
+      return false;
+    }
+
+    state_ = CellState::Apple;
+    return true;
   }
 
 private:
@@ -60,6 +73,10 @@ private:
 
     bool isThisCell{data->headRow == row_ && data->headCol == col_};
     if (isThisCell) {
+      if (state_ == CellState::Apple) {
+        SDL_Event event{UserEvents::APPLE_EATEN};
+        SDL_PushEvent(&event);
+      }
       state_ = CellState::Snake;
       snakeDuration_ = data->length;
     } else if (state_ == CellState::Snake) {
