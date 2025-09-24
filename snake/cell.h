@@ -3,7 +3,9 @@
 
 #include "assets.h"
 #include "game_config.h"
+#include "snake/snake_data.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
 #include <SDL2/SDL_surface.h>
 
 enum class CellState { Snake, Apple, Empty };
@@ -14,7 +16,13 @@ public:
     initialize();
   }
 
-  void handleEvent(const SDL_Event &e) {}
+  void handleEvent(const SDL_Event &e) {
+    using namespace UserEvents;
+    if (e.type == ADVANCE) {
+      advance(e.user);
+    }
+  }
+
   void tick(Uint32 deltaTime) {}
   void render(SDL_Surface *surface) {
     SDL_FillRect(surface, &backgroundRect_,
@@ -33,13 +41,32 @@ public:
 private:
   void initialize() {
     state_ = CellState::Empty;
+    snakeDuration_ = 0;
+
     int middleRow = Config::GRID_ROWS / 2;
     if (row_ == middleRow && col_ == 2) {
       state_ = CellState::Snake;
+      snakeDuration_ = 1;
     } else if (row_ == middleRow && col_ == 3) {
       state_ = CellState::Snake;
+      snakeDuration_ = 2;
     } else if (row_ == middleRow && col_ == 11) {
       state_ = CellState::Apple;
+    }
+  }
+
+  void advance(const SDL_UserEvent &e) {
+    SnakeData *data{static_cast<SnakeData *>(e.data1)};
+
+    bool isThisCell{data->headRow == row_ && data->headCol == col_};
+    if (isThisCell) {
+      state_ = CellState::Snake;
+      snakeDuration_ = data->length;
+    } else if (state_ == CellState::Snake) {
+      --snakeDuration_;
+      if (snakeDuration_ == 0) {
+        state_ = CellState::Empty;
+      }
     }
   }
 
@@ -52,6 +79,7 @@ private:
                            Config::CELL_SIZE, Config::CELL_SIZE};
   SDL_Color backgroundColor_{(row_ + col_) % 2 == 0 ? Config::CELL_COLOR_A
                                                     : Config::CELL_COLOR_B};
+  int snakeDuration_{0};
 };
 
 #endif // CELL_H

@@ -3,6 +3,7 @@
 #include <SDL2/SDL_ttf.h>
 
 #include "engine/window.h"
+#include "snake/game_state.h"
 #include "snake/game_ui.h"
 
 int main(int argc, char **argv) {
@@ -17,6 +18,7 @@ int main(int argc, char **argv) {
 
   Window gameWindow{};
   GameUI gameUI{};
+  GameState state{};
 
   Uint32 previousTick{SDL_GetTicks()};
   Uint32 currentTick;
@@ -29,6 +31,7 @@ int main(int argc, char **argv) {
 
     while (SDL_PollEvent(&event)) {
       gameUI.handleEvent(event);
+      state.handleEvent(event);
       if (event.type == SDL_QUIT) {
         SDL_Quit();
         IMG_Quit();
@@ -36,6 +39,7 @@ int main(int argc, char **argv) {
       }
     }
 
+    state.tick(deltaTime);
     gameUI.tick(deltaTime);
 
     gameWindow.render();

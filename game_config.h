@@ -6,9 +6,14 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 
+namespace UserEvents {
+inline Uint32 ADVANCE{SDL_RegisterEvents(1)};
+}
+
 namespace Config {
 // Game Settings
 inline const std::string GAME_NAME{"snake"};
+inline constexpr int ADVANCE_INTERVAL{200};
 inline constexpr int GRID_COLUMS{16};
 static_assert(GRID_COLUMS >= 12, "GRID_COLUMS must be at least 12");
 
