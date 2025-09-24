@@ -13,13 +13,20 @@ public:
       handleKeyEvent(e.key);
     } else if (e.type == UserEvents::APPLE_EATEN) {
       ++snake.length;
+      if (snake.length == Config::MAX_LENGTH) {
+        SDL_Event event{UserEvents::GAME_WON};
+        SDL_PushEvent(&event);
+      }
     } else if (e.type == UserEvents::RESTART_GAME) {
       restartGame();
+    } else if (e.type == UserEvents::GAME_LOST ||
+               e.type == UserEvents::GAME_WON) {
+      isGameOver = true;
     }
   }
 
   void tick(Uint32 deltaTime) {
-    if (isPaused) {
+    if (isPaused || isGameOver) {
       return;
     }
 
@@ -48,12 +55,20 @@ private:
       break;
     }
 
+    if (snake.headRow < 0 || snake.headRow >= Config::GRID_ROWS ||
+        snake.headCol < 0 || snake.headCol >= Config::GRID_COLUMS) {
+      SDL_Event event{UserEvents::GAME_LOST};
+      SDL_PushEvent(&event);
+      return;
+    }
+
     SDL_Event event{UserEvents::ADVANCE};
     event.user.data1 = &snake;
     SDL_PushEvent(&event);
   }
 
   void restartGame() {
+    isGameOver = false;
     isPaused = true;
     snake = {.headRow = Config::GRID_ROWS / 2,
              .headCol = 3,
@@ -64,6 +79,9 @@ private:
   }
 
   void handleKeyEvent(const SDL_KeyboardEvent &e) {
+    if (isGameOver) {
+      return;
+    }
     switch (e.keysym.sym) {
     case SDLK_UP:
     case SDLK_w:
@@ -103,6 +121,7 @@ private:
   Uint32 elapsedTime{0};
   MoveDirection nextDirection{RIGHT};
   bool isPaused{true};
+  bool isGameOver{false};
 };
 
 #endif // GAME_STATE_H

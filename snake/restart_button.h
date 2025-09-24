@@ -20,6 +20,11 @@ public:
     using namespace UserEvents;
     if (e.type == SDL_MOUSEBUTTONDOWN) {
       handleLeftClick(e.button);
+    } else if (e.type == UserEvents::GAME_WON ||
+               e.type == UserEvents::GAME_LOST) {
+      current_color_ = Config::BUTTON_HIGHLIGHT_COLOR;
+    } else if (e.type == UserEvents::RESTART_GAME) {
+      current_color_ = Config::BUTTON_COLOR;
     }
   }
 

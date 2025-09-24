@@ -10,6 +10,8 @@ namespace UserEvents {
 inline Uint32 ADVANCE{SDL_RegisterEvents(1)};
 inline Uint32 APPLE_EATEN{SDL_RegisterEvents(1)};
 inline Uint32 RESTART_GAME{SDL_RegisterEvents(1)};
+inline Uint32 GAME_WON{SDL_RegisterEvents(1)};
+inline Uint32 GAME_LOST{SDL_RegisterEvents(1)};
 } // namespace UserEvents
 
 namespace Config {
@@ -18,9 +20,9 @@ inline const std::string GAME_NAME{"snake"};
 inline constexpr int ADVANCE_INTERVAL{200};
 inline constexpr int GRID_COLUMS{16};
 static_assert(GRID_COLUMS >= 12, "GRID_COLUMS must be at least 12");
-
 inline constexpr int GRID_ROWS{5};
 static_assert(GRID_ROWS >= 5, "GRID_ROWS must be at least 5");
+inline constexpr int MAX_LENGTH{GRID_COLUMS * GRID_ROWS};
 
 // Size and Positioning
 inline constexpr int CELL_SIZE{36};
@@ -38,7 +40,11 @@ inline constexpr SDL_Color FONT_COLOR{255, 255, 255, 255};
 inline constexpr SDL_Color CELL_COLOR_A{171, 214, 82, 255};
 inline constexpr SDL_Color CELL_COLOR_B{161, 208, 74, 255};
 inline constexpr SDL_Color SNAKE_COLOR{67, 117, 234, 255};
+inline constexpr SDL_Color SNAKE_LOST_COLOR{237, 67, 97, 255};
+inline constexpr SDL_Color SNAKE_VICTORY_COLOR{255, 140, 0, 255};
+
 inline constexpr SDL_Color BUTTON_COLOR{73, 117, 46, 255};
+inline constexpr SDL_Color BUTTON_HIGHLIGHT_COLOR{67, 117, 234, 255};
 
 // Assets Paths
 inline const std::string APPLE_IMAGE{"apple.png"};

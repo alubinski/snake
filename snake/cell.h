@@ -24,12 +24,17 @@ public:
       if (state_ == CellState::Snake) {
         snakeDuration_++;
       }
+    } else if (e.type == GAME_WON) {
+      snakeColor_ = Config::SNAKE_VICTORY_COLOR;
+    } else if (e.type == GAME_LOST) {
+      snakeColor_ = Config::SNAKE_LOST_COLOR;
     } else if (e.type == RESTART_GAME) {
       initialize();
     }
   }
 
   void tick(Uint32 deltaTime) {}
+
   void render(SDL_Surface *surface) {
     SDL_FillRect(surface, &backgroundRect_,
                  SDL_MapRGB(surface->format, backgroundColor_.r,
@@ -39,8 +44,8 @@ public:
       assets_.apple.render(surface, &backgroundRect_);
     } else if (state_ == CellState::Snake) {
       SDL_FillRect(surface, &backgroundRect_,
-                   SDL_MapRGB(surface->format, Config::SNAKE_COLOR.r,
-                              Config::SNAKE_COLOR.g, Config::SNAKE_COLOR.b));
+                   SDL_MapRGB(surface->format, snakeColor_.r, snakeColor_.g,
+                              snakeColor_.b));
     }
   }
 
@@ -57,6 +62,7 @@ private:
   void initialize() {
     state_ = CellState::Empty;
     snakeDuration_ = 0;
+    snakeColor_ = Config::SNAKE_COLOR;
 
     int middleRow = Config::GRID_ROWS / 2;
     if (row_ == middleRow && col_ == 2) {
@@ -75,6 +81,12 @@ private:
 
     bool isThisCell{data->headRow == row_ && data->headCol == col_};
     if (isThisCell) {
+      if (state_ == CellState::Snake) {
+        // Snake ran into itself
+        SDL_Event event{UserEvents::GAME_LOST};
+        SDL_PushEvent(&event);
+        return;
+      }
       if (state_ == CellState::Apple) {
         SDL_Event event{UserEvents::APPLE_EATEN};
         SDL_PushEvent(&event);
@@ -99,6 +111,7 @@ private:
   SDL_Color backgroundColor_{(row_ + col_) % 2 == 0 ? Config::CELL_COLOR_A
                                                     : Config::CELL_COLOR_B};
   int snakeDuration_{0};
+  SDL_Color snakeColor_{Config::SNAKE_COLOR};
 };
 
 #endif // CELL_H
