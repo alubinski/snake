@@ -33,7 +33,13 @@ public:
     }
   }
 
-  void tick(Uint32 deltaTime) {}
+  void tick(Uint32 deltaTime) {
+    if (state_ == CellState::Snake && fillPercent_ < 1.0f) {
+      growHead(deltaTime);
+    } else if (state_ != CellState::Snake && fillPercent_ > 0.0f) {
+      shrinkTail(deltaTime);
+    }
+  }
 
   void render(SDL_Surface *surface) {
     SDL_FillRect(surface, &backgroundRect_,
@@ -42,8 +48,8 @@ public:
 
     if (state_ == CellState::Apple) {
       assets_.apple.render(surface, &backgroundRect_);
-    } else if (state_ == CellState::Snake) {
-      SDL_FillRect(surface, &backgroundRect_,
+    } else if (fillPercent_ > 0.0f) {
+      SDL_FillRect(surface, &snakeRect_,
                    SDL_MapRGB(surface->format, snakeColor_.r, snakeColor_.g,
                               snakeColor_.b));
     }
@@ -60,17 +66,22 @@ public:
 
 private:
   void initialize() {
+    fillDirection_ = MoveDirection::RIGHT;
+    snakeRect_ = backgroundRect_;
     state_ = CellState::Empty;
     snakeDuration_ = 0;
     snakeColor_ = Config::SNAKE_COLOR;
+    fillPercent_ = 0.0f;
 
     int middleRow = Config::GRID_ROWS / 2;
     if (row_ == middleRow && col_ == 2) {
       state_ = CellState::Snake;
       snakeDuration_ = 1;
+      fillPercent_ = 1.0f;
     } else if (row_ == middleRow && col_ == 3) {
       state_ = CellState::Snake;
       snakeDuration_ = 2;
+      fillPercent_ = 1.0f;
     } else if (row_ == middleRow && col_ == 11) {
       state_ = CellState::Apple;
     }
@@ -93,11 +104,54 @@ private:
       }
       state_ = CellState::Snake;
       snakeDuration_ = data->length;
+      fillDirection_ = data->direction;
+      fillPercent_ = 0.0f;
     } else if (state_ == CellState::Snake) {
+      if (snakeDuration_ == data->length) {
+        fillDirection_ = data->direction;
+      }
       --snakeDuration_;
       if (snakeDuration_ == 0) {
         state_ = CellState::Empty;
       }
+    }
+  }
+
+  void growHead(float deltaTime) {
+    using namespace Config;
+    fillPercent_ += deltaTime / ADVANCE_INTERVAL;
+    if (fillPercent_ > 1.0f) {
+      fillPercent_ = 1.0f;
+    }
+
+    snakeRect_ = backgroundRect_;
+    if (fillDirection_ == MoveDirection::RIGHT) {
+      snakeRect_.w = CELL_SIZE * fillPercent_;
+    } else if (fillDirection_ == MoveDirection::LEFT) {
+      snakeRect_.x = backgroundRect_.x + CELL_SIZE * (1.0f - fillPercent_);
+    } else if (fillDirection_ == MoveDirection::DOWN) {
+      snakeRect_.h = CELL_SIZE * fillPercent_;
+    } else if (fillDirection_ == MoveDirection::UP) {
+      snakeRect_.y = backgroundRect_.y + CELL_SIZE * (1.0f - fillPercent_);
+    }
+  }
+
+  void shrinkTail(float deltaTime) {
+    using namespace Config;
+    fillPercent_ -= deltaTime / ADVANCE_INTERVAL;
+    if (fillPercent_ < 0.0f) {
+      fillPercent_ = 0.0f;
+    }
+
+    snakeRect_ = backgroundRect_;
+    if (fillDirection_ == MoveDirection::RIGHT) {
+      snakeRect_.x = backgroundRect_.x + CELL_SIZE * (1 - fillPercent_);
+    } else if (fillDirection_ == MoveDirection::LEFT) {
+      snakeRect_.w = CELL_SIZE * fillPercent_;
+    } else if (fillDirection_ == MoveDirection::DOWN) {
+      snakeRect_.y = backgroundRect_.y + CELL_SIZE * (1.0f - fillPercent_);
+    } else if (fillDirection_ == MoveDirection::UP) {
+      snakeRect_.h = CELL_SIZE * fillPercent_;
     }
   }
 
@@ -112,6 +166,9 @@ private:
                                                     : Config::CELL_COLOR_B};
   int snakeDuration_{0};
   SDL_Color snakeColor_{Config::SNAKE_COLOR};
+  SDL_Rect snakeRect_;
+  float fillPercent_{0};
+  MoveDirection fillDirection_{MoveDirection::RIGHT};
 };
 
 #endif // CELL_H
